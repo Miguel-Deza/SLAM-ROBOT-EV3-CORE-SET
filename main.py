@@ -1,24 +1,35 @@
 #!/usr/bin/env pybricks-micropython
+import socket
 from pybricks.hubs import EV3Brick
-from pybricks.ev3devices import GyroSensor
+from pybricks.ev3devices import UltrasonicSensor
 from pybricks.parameters import Port
 from pybricks.tools import wait
 
-# Inicializamos el EV3 y el sensor giroscópico en el puerto S2
+# Inicializamos el EV3 y el sensor ultrasónico en el puerto S1
 ev3 = EV3Brick()
-gyro = GyroSensor(Port.S2)
+ultrasonic_sensor = UltrasonicSensor(Port.S1)
 
-# Restablecemos el sensor giroscópico para comenzar en ángulo cero
-gyro.reset_angle(0)
+# Configuramos el socket para que el EV3 actúe como servidor
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind(('', 12345))  # Usamos el puerto 12345
+server_socket.listen(1)  # Escucha hasta una conexión
 
-# Bucle infinito para mostrar el ángulo detectado
-while True:
-    # Obtenemos el ángulo actual del giroscopio
-    angulo = gyro.angle()
-    
-    # Mostramos el ángulo en la pantalla del EV3
-    ev3.screen.clear()
-    ev3.screen.draw_text(0, 50, "Angulo: " + str(angulo))
-    
-    # Espera breve para que la lectura sea más estable
-    wait(200)
+# Aceptamos la conexión
+print("Esperando conexión...")
+client_socket, address = server_socket.accept()
+print("Conectado a:", address)
+
+try:
+    while True:
+        # Medimos la distancia con el sensor ultrasónico
+        distancia = ultrasonic_sensor.distance()
+        
+        # Enviamos la distancia a la computadora
+        client_socket.send(str(distancia).encode())
+        
+        # Espera breve antes de la próxima lectura
+        wait(1000)
+finally:
+    # Cerramos el socket al terminar
+    client_socket.close()
+    server_socket.close()
