@@ -4,14 +4,14 @@ import socket
 import config
 from ev3dev2.motor import (OUTPUT_B, OUTPUT_C, OUTPUT_D, LargeMotor,
                            MediumMotor, MoveSteering)
-from ev3dev2.sensor.lego import InfraredSensor
+from ev3dev2.sensor.lego import UltrasonicSensor
 from ev3dev2.sound import Sound
 
 
 DISTANCE_FACTOR = 36
 ANGLE_FACTOR = 5.65
 SCAN_POSITION_FACTOR = 3
-# Actual maximal valid value is 99, but more distant mesurements are more noisy
+# Actual maximal valid value is 99, but more distant measurements are more noisy
 MAX_VALID_MEASUREMENT = 50
 
 SOUND_ON = False
@@ -32,7 +32,7 @@ steer_pair = MoveSteering(OUTPUT_B, OUTPUT_C, motor_class=LargeMotor)
 motor_sensor = MediumMotor(OUTPUT_D)
 
 # Init sensor
-ir_sensor = InfraredSensor()
+ultrasonic_sensor = UltrasonicSensor()
 sensor_orientation = 0
 
 
@@ -97,7 +97,7 @@ def rotate_sensor(angle, block=True, speed=5):
     motor_sensor.on_for_degrees(speed=speed,
                                 degrees=angle_scaled,
                                 block=block)
-    global sensor_orientation
+    global sensor_orientation``
     sensor_orientation += angle_scaled
 
 
@@ -106,13 +106,12 @@ def rotate_sensor_to_zero_position():
 
 
 def measure_and_send(angle):
-    m = ir_sensor.proximity
+    m = ultrasonic_sensor.distance_centimeters
     if m <= MAX_VALID_MEASUREMENT:
-        m_cm = m * 0.7
-        msg = str(angle) + " " + str(m_cm)
-        print("Measured " + str(m_cm) + " at " + str(angle))
+        msg = str(angle) + " " + str(m)
+        print("Measured " + str(m) + " cm at " + str(angle))
     else:
-        m_cm = MAX_VALID_MEASUREMENT * 0.7
+        m_cm = MAX_VALID_MEASUREMENT
         msg = str(angle) + " " + str(m_cm) + " FREE"
         print("Looking at infinity " + str(angle))
 

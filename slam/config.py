@@ -21,7 +21,7 @@ class Config(object):
     LIMITED_VIEW = 30.0  # Set to None to allow measurements up to infinity
 
     # LEGO Mindstorms robot (Socket)
-    HOST = "10.7.134.55"
+    HOST = "10.7.135.58"
     PORT = 12345
 
     # Save
